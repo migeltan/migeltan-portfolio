@@ -80,6 +80,10 @@ function tk(dark) {
   };
 }
 
+// NOTE: `label` is always plain text (used as the fallback / accessible text).
+// `icon` (optional) is an imported image asset, rendered via <img src={...}>.
+// Previously `label` was overloaded to sometimes hold an imported SVG, which
+// React just printed as text/nothing instead of rendering an image.
 const techStack = [
   {
     category: "Programming & Data",
@@ -89,8 +93,8 @@ const techStack = [
       { name: "Matplotlib", label: "Mpl" },
       { name: "Scikit-learn", label: "Skl" },
       { name: "SQL", label: "SQL" },
-      { name: "Java", label: "J" },
-      { name: "C", label: C },
+      { name: "Java", label: "J", icon: java },
+      { name: "C", label: "C", icon: C },
       { name: "COBOL", label: "Cb" },
     ],
   },
@@ -136,29 +140,39 @@ function ScrollRow({ items, t }) {
     });
   };
 
+  const arrowStyle = {
+    flexShrink: 0,
+    alignSelf: "center",
+    width: "clamp(22px, 6vw, 28px)",
+    height: "clamp(22px, 6vw, 28px)",
+    borderRadius: "50%",
+    border: `1px solid ${t.arrowBorder}`,
+    background: t.arrowBg,
+    color: t.arrowText,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    fontSize: "12px",
+  };
+
   return (
-    <div style={{ position: "relative", padding: "14px 16px" }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "stretch",
+        gap: "8px",
+        padding: "14px 12px",
+        boxSizing: "border-box",
+        width: "100%",
+        height: "100%",
+        minHeight: 0,
+      }}
+    >
       <button
         onClick={() => scroll(-1)}
         aria-label="Scroll left"
-        style={{
-          position: "absolute",
-          left: 4,
-          top: "50%",
-          transform: "translateY(-50%)",
-          width: 28,
-          height: 28,
-          borderRadius: "50%",
-          border: `1px solid ${t.arrowBorder}`,
-          background: t.arrowBg,
-          color: t.arrowText,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          zIndex: 2,
-          fontSize: "12px",
-        }}
+        style={arrowStyle}
       >
         <FaChevronLeft />
       </button>
@@ -167,10 +181,13 @@ function ScrollRow({ items, t }) {
         ref={scrollRef}
         style={{
           display: "flex",
+          alignItems: "stretch",
           gap: "14px",
           overflowX: "auto",
           scrollBehavior: "smooth",
-          padding: "0 32px",
+          flex: 1,
+          minWidth: 0,
+          height: "100%",
           scrollbarWidth: "none",
         }}
       >
@@ -183,13 +200,15 @@ function ScrollRow({ items, t }) {
               flexDirection: "column",
               alignItems: "center",
               gap: "6px",
-              width: "70px",
+              width: "clamp(60px, 13vw, 90px)",
+              height: "100%",
             }}
           >
             <div
               style={{
-                width: "48px",
-                height: "48px",
+                flex: 1,
+                width: "100%",
+                minHeight: 0,
                 borderRadius: "10px",
                 border: `1px solid ${t.logoBorder}`,
                 background: t.logoBg,
@@ -197,19 +216,37 @@ function ScrollRow({ items, t }) {
                 alignItems: "center",
                 justifyContent: "center",
                 fontWeight: 700,
-                fontSize: "14px",
+                fontSize: "clamp(11px, 3vw, 16px)",
                 color: t.logoText,
+                overflow: "hidden",
+                boxSizing: "border-box",
+                padding: "10%",
               }}
             >
-              {item.label}
+              {item.icon ? (
+                <img
+                  src={item.icon}
+                  alt={item.name}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
+              ) : (
+                item.label
+              )}
             </div>
             <span
               style={{
+                flexShrink: 0,
                 fontSize: "11px",
                 fontWeight: 600,
                 color: t.logoText,
                 textAlign: "center",
                 lineHeight: 1.2,
+                whiteSpace: "nowrap",
               }}
             >
               {item.name}
@@ -221,24 +258,7 @@ function ScrollRow({ items, t }) {
       <button
         onClick={() => scroll(1)}
         aria-label="Scroll right"
-        style={{
-          position: "absolute",
-          right: 4,
-          top: "50%",
-          transform: "translateY(-50%)",
-          width: 28,
-          height: 28,
-          borderRadius: "50%",
-          border: `1px solid ${t.arrowBorder}`,
-          background: t.arrowBg,
-          color: t.arrowText,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          zIndex: 2,
-          fontSize: "12px",
-        }}
+        style={arrowStyle}
       >
         <FaChevronRight />
       </button>
@@ -302,6 +322,7 @@ export default function TechStack() {
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
+              height: "100%",
             }}
           >
             <div
@@ -311,6 +332,7 @@ export default function TechStack() {
                 background: t.panelHeaderBg,
                 display: "flex",
                 alignItems: "center",
+                flexShrink: 0,
               }}
             >
               <TrafficLights size={10} />
@@ -326,7 +348,9 @@ export default function TechStack() {
               </h3>
             </div>
 
-            <ScrollRow items={items} t={t} />
+            <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+              <ScrollRow items={items} t={t} />
+            </div>
           </div>
         ))}
       </div>
