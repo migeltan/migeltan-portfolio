@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FaReact } from "react-icons/fa";
 import act1 from "../../images/multimedia/img4.jpg";
 
 const kwagee = [
@@ -48,16 +49,13 @@ function tk(dark) {
     sectionDivider: dark ? "#2a2d3a" : "#e5e7eb",
     heading: dark ? "#f0f2f8" : "#1c1e21",
     subText: dark ? "#c8cfe0" : "#374151",
-    badgeBg: dark ? "#f0f2f8" : "#1c1e21",
-    badgeText: dark ? "#1c1e21" : "#ffffff",
-    pillBg: dark ? "#1e2130" : "#f3f4f6",
-    pillBorder: dark ? "#2a2d3a" : "#e5e7eb",
-    pillText: dark ? "#9ba3b8" : "#9ca3af",
     btnBorder: dark ? "#3a3f55" : "#111111",
-    shadow: dark ? "0 1px 6px rgba(0,0,0,0.5)" : "0 1px 4px rgba(0,0,0,0.06)",
-    overlayBg: dark ? "rgba(0,0,0,0.45)" : "rgba(0,0,0,0.25)",
-    overlayBgHover: dark ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.1)",
-    overlayText: "#ffffff",
+    shadowRest: dark
+      ? "0 1px 6px rgba(0,0,0,0.5)"
+      : "0 1px 4px rgba(0,0,0,0.06)",
+    shadowHover: dark
+      ? "0 14px 28px rgba(0,0,0,0.55)"
+      : "0 14px 28px rgba(0,0,0,0.14)",
   };
 }
 
@@ -118,14 +116,20 @@ function CoverImage({ image, t }) {
   );
 }
 
-function ExamPanel({ id, name, image, description, t }) {
+function ExamPanel({ name, image, description, t }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <div
       className="act-panel"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         border: `1px solid ${t.cardBorder}`,
         background: t.cardBg,
-        boxShadow: t.shadow,
+        boxShadow: hovered ? t.shadowHover : t.shadowRest,
+        transform: hovered ? "translateY(-6px)" : "translateY(0)",
+        transition: "transform 0.25s ease, box-shadow 0.25s ease",
         width: "100%",
       }}
     >
@@ -135,14 +139,11 @@ function ExamPanel({ id, name, image, description, t }) {
           borderBottom: `1px solid ${t.titleBarBorder}`,
           background: t.titleBarBg,
           padding: "12px 16px",
+          display: "flex",
+          alignItems: "center",
         }}
       >
-        <span
-          className="act-panel__badge"
-          style={{ background: t.badgeBg, color: t.badgeText }}
-        >
-          #{id}
-        </span>
+        <TrafficLights />
         <h3
           className="act-panel__name"
           style={{ color: t.heading, fontSize: "1.05rem", fontWeight: 700 }}
@@ -153,7 +154,12 @@ function ExamPanel({ id, name, image, description, t }) {
 
       <div
         className="act-panel__body"
-        style={{ flexDirection: "column", padding: "16px", gap: "12px" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          padding: "16px",
+          gap: "12px",
+        }}
       >
         <CoverImage image={image} t={t} />
         {description && (
@@ -174,12 +180,12 @@ function ExamPanel({ id, name, image, description, t }) {
   );
 }
 
-export default function kwageeHackathon({ sectionRef, onCountChange }) {
+export default function KwageeHackathon({ sectionRef, onCountChange }) {
   const dark = useTheme();
   const t = tk(dark);
 
   useEffect(() => {
-    onCountChange(kwagee.length);
+    onCountChange?.(kwagee.length);
   }, []);
 
   return (
@@ -195,25 +201,17 @@ export default function kwageeHackathon({ sectionRef, onCountChange }) {
         <div
           className="act-header"
           style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
             borderBottom: `1px solid ${t.sectionDivider}`,
             justifyContent: "flex-start",
           }}
         >
-          <TrafficLights />
+          <FaReact style={{ fontSize: "1.3rem", color: t.heading }} />
           <h2 className="section-title" style={{ margin: 0, color: t.heading }}>
             Project #3: Stellar Blockchain: XLM Cryptocurrency
           </h2>
-          <span
-            className="act-pill"
-            style={{
-              color: t.pillText,
-              background: t.pillBg,
-              border: `1px solid ${t.pillBorder}`,
-              marginLeft: "auto",
-            }}
-          >
-            {kwagee.length} item
-          </span>
         </div>
         <div style={{ width: "100%", padding: "16px 16px 16px 16px" }}>
           {kwagee.map((exam) => (

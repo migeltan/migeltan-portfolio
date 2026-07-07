@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PiFlask } from "react-icons/pi";
 
 const TrafficLights = ({ size = 12 }) => (
@@ -59,6 +59,30 @@ function useTheme() {
   return dark;
 }
 
+// Fires once, the first time the element scrolls into view.
+function useInView(threshold = 0.15) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return [ref, inView];
+}
+
 function tk(dark) {
   return {
     panelBg: dark ? "#161b22" : "#ffffff",
@@ -66,13 +90,15 @@ function tk(dark) {
     panelHeaderBg: dark ? "#11151b" : "#fafafa",
     panelHeaderBorder: dark ? "#30363d" : "#f0f0f0",
     panelTitle: dark ? "#e6edf3" : "#1c1e21",
-    logoBg: dark ? "#161b22" : "#fafafa",
-    logoBorder: dark ? "#30363d" : "#e5e7eb",
-    logoText: dark ? "#e6edf3" : "#374151",
-    arrowBg: dark ? "#161b22" : "#ffffff",
-    arrowBorder: dark ? "#30363d" : "#e5e7eb",
-    arrowText: dark ? "#c9d1d9" : "#374151",
     sectionDivider: dark ? "#30363d" : "#e5e7eb",
+    btnText: dark ? "#e6edf3" : "#1c1e21",
+    btnBg: dark ? "#161b22" : "#fafafa",
+    btnBorder: dark ? "#30363d" : "#e5e7eb",
+    btnHoverBg: dark ? "#21262d" : "#f0f0f0",
+    placeholderBorder: dark ? "#30363d" : "#d1d5db",
+    panelShadowHover: dark
+      ? "0 12px 24px rgba(0,0,0,0.5)"
+      : "0 12px 24px rgba(0,0,0,0.1)",
   };
 }
 
@@ -102,13 +128,17 @@ const tableOfContents = [
     category: "Projects",
     items: [
       { label: "Programming", component: null, props: { scrollTo: "javasql" } },
-      { label: "Seatworks", component: null, props: { scrollTo: "seatworks" } },
+      { label: "UI/UX", component: null, props: { scrollTo: "figma" } },
       {
-        label: "Activities",
+        label: "Web Development",
         component: null,
-        props: { scrollTo: "activities" },
+        props: { scrollTo: "kwagee" },
       },
-      { label: "Exams", component: null, props: { scrollTo: "exams" } },
+      {
+        label: "Machine Learning",
+        component: null,
+        props: { scrollTo: "machinelearning" },
+      },
     ],
   },
   {
@@ -126,6 +156,8 @@ const maxItems = Math.max(...tableOfContents.map((c) => c.items.length));
 export default function TableOfContents({ onPageChange, onScrollTo }) {
   const dark = useTheme();
   const t = tk(dark);
+  const [sectionRef, inView] = useInView(0.1);
+  const [hoveredPanel, setHoveredPanel] = useState(null);
 
   const handleClick = (category, label, props) => {
     if (category === "Projects") {
@@ -142,7 +174,15 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
   };
 
   return (
-    <section className="card">
+    <section
+      ref={sectionRef}
+      className="card"
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? "translateY(0px)" : "translateY(28px)",
+        transition: "opacity 0.7s ease, transform 0.7s ease",
+      }}
+    >
       <div
         className="section-header"
         style={{
@@ -162,32 +202,40 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
 
       <div
         style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "16px",
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "clamp(6px, 2.5vw, 16px)",
           marginTop: "16px",
         }}
       >
-        {tableOfContents.map(({ category, items }) => {
+        {tableOfContents.map(({ category, items }, idx) => {
           const placeholderCount = maxItems - items.length;
+          const hovered = hoveredPanel === category;
 
           return (
             <div
               key={category}
+              onMouseEnter={() => setHoveredPanel(category)}
+              onMouseLeave={() => setHoveredPanel(null)}
               style={{
-                flex: "1 1 220px",
-                minWidth: "200px",
+                minWidth: 0,
                 border: `1px solid ${t.panelBorder}`,
                 borderRadius: "10px",
                 background: t.panelBg,
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
+                boxShadow: hovered ? t.panelShadowHover : "none",
+                transform: hovered ? "translateY(-4px)" : "translateY(0)",
+                opacity: inView ? 1 : 0,
+                transition:
+                  `opacity 0.6s ease ${0.08 + idx * 0.12}s, ` +
+                  `transform 0.25s ease, box-shadow 0.25s ease`,
               }}
             >
               <div
                 style={{
-                  padding: "12px 16px",
+                  padding: "clamp(8px, 3vw, 12px) clamp(6px, 3vw, 16px)",
                   borderBottom: `1px solid ${t.panelHeaderBorder}`,
                   background: t.panelHeaderBg,
                   display: "flex",
@@ -198,9 +246,12 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
                 <h3
                   style={{
                     margin: 0,
-                    fontSize: "1rem",
+                    fontSize: "clamp(0.78rem, 3.2vw, 1rem)",
                     fontWeight: 700,
                     color: t.panelTitle,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
                   {category}
@@ -209,10 +260,10 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
 
               <div
                 style={{
-                  padding: "14px 16px",
+                  padding: "clamp(8px, 3vw, 14px) clamp(6px, 3vw, 16px)",
                   display: "flex",
                   flexDirection: "column",
-                  gap: "10px",
+                  gap: "clamp(6px, 2vw, 10px)",
                 }}
               >
                 {items.map(({ label, props }) => (
@@ -221,15 +272,18 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
                     onClick={() => handleClick(category, label, props)}
                     style={{
                       textAlign: "left",
-                      fontSize: "0.85rem",
+                      fontSize: "clamp(0.62rem, 2.6vw, 0.85rem)",
                       fontWeight: 600,
                       color: t.btnText,
                       background: t.btnBg,
                       border: `1px solid ${t.btnBorder}`,
                       borderRadius: "8px",
-                      padding: "10px 14px",
+                      padding: "clamp(6px, 2vw, 10px) clamp(6px, 2vw, 14px)",
                       cursor: "pointer",
                       transition: "background 0.2s",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
                     }}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background = t.btnHoverBg)
@@ -246,7 +300,7 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
                   <div
                     key={`placeholder-${i}`}
                     style={{
-                      height: "37px",
+                      height: "clamp(28px, 8vw, 37px)",
                       borderRadius: "8px",
                       border: `1.5px dashed ${t.placeholderBorder}`,
                     }}

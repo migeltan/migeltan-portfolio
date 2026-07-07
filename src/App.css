@@ -6,6 +6,25 @@
   box-sizing: border-box;
 }
 
+.about-me-section {
+  max-width: 1400px;
+  margin: 0 auto 20px;
+}
+
+/* PANEL GRID — 4 across on desktop, 2x2 on mobile */
+.about-me-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(10px, 2vw, 16px);
+  margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .about-me-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
