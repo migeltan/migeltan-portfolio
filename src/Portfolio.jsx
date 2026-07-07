@@ -2,15 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { FaSun, FaMoon, FaBars, FaTimes } from "react-icons/fa";
 
 import Home from "./main/01_home/Home_Index";
-import Midterm from "./main/02_midterms/Midterms_Index";
+import Projects from "./main/02_proj/Index_Proj";
 import Finals from "./main/03_finals/Finals_Index";
 import Contacts from "./main/04_contacts/Contacts_Index";
 import logo from "./images/multimedia/img3.jpg";
 
 import "./App.css";
 import "./css/Navbar.css";
+import "./css/Activities.css";
 
-const PAGES = ["Home", "Midterms", "Finals", "Contacts"];
+const PAGES = ["Dashboard", "Projects", "Contacts"];
 
 export default function Portfolio() {
   const [darkMode, setDarkMode] = useState(false);
@@ -21,11 +22,29 @@ export default function Portfolio() {
   const lastScrollY = useRef(0);
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const currentY = window.scrollY;
-      setVisible(currentY < lastScrollY.current || currentY < 10);
-      lastScrollY.current = currentY;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentY = window.scrollY;
+          const delta = currentY - lastScrollY.current;
+
+          if (currentY < 80) {
+            setVisible(true);
+          } else if (delta > 5) {
+            setVisible(false);
+          } else if (delta < -5) {
+            setVisible(true);
+          }
+
+          lastScrollY.current = currentY;
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -39,12 +58,10 @@ export default function Portfolio() {
 
   const renderPage = () => {
     switch (activePage) {
-      case "Home":
+      case "Dashboard":
         return <Home darkMode={darkMode} onPageChange={handlePageChange} />;
-      case "Midterms":
-        return <Midterm scrollTo={activeScrollTo} />;
-      case "Finals":
-        return <Finals scrollTo={activeScrollTo} />;
+      case "Projects":
+        return <Projects scrollTo={activeScrollTo} />;
       case "Contacts":
         return <Contacts />;
       default:
@@ -72,9 +89,7 @@ export default function Portfolio() {
             />
             <div className="flex flex-col leading-tight">
               <span className="font-bold text-lg">Migel H. Tan</span>
-              <span className="text-xs opacity-70">
-                Object-Oriented Programming
-              </span>
+              <span className="text-xs opacity-70">E-Portfolio</span>
             </div>
           </div>
 
@@ -91,17 +106,16 @@ export default function Portfolio() {
             ))}
           </nav>
 
-          {/* HAMBURGER — mobile */}
-          <button
-            className={`hamburger ${menuOpen ? "open" : ""}`}
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
-          >
-            {menuOpen ? <FaTimes size={18} /> : <FaBars size={18} />}
-          </button>
+          {/* HAMBURGER + THEME TOGGLE — grouped */}
+          <div className="navbar-controls">
+            <button
+              className={`hamburger ${menuOpen ? "open" : ""}`}
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? <FaTimes size={18} /> : <FaBars size={18} />}
+            </button>
 
-          {/* THEME TOGGLE */}
-          <div className="flex justify-center items-center">
             <button
               className="theme-toggle"
               onClick={() => setDarkMode(!darkMode)}
@@ -115,8 +129,8 @@ export default function Portfolio() {
               </div>
             </button>
           </div>
-        </div>
-
+        </div>{" "}
+        {/* ← THIS closes .navbar-inner — was missing */}
         {/* MOBILE DROPDOWN */}
         {menuOpen && (
           <div className={`mobile-menu open ${themeClass}`}>

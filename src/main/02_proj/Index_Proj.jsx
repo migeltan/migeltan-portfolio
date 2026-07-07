@@ -1,29 +1,29 @@
 import { useState, useRef, useEffect } from "react";
-import QuizzesSection from "./Mid_Quizzes";
-import SeatworksSection from "./Mid_Seatworks";
-import ActivitiesSection from "./Mid_Activities";
-import Mid_Exams from "./Mid_Exams";
+import JavaSQL from "./Proj_JAVA";
+import PUPEase from "./Proj_UI";
+import KwageeHackathon from "./Proj_KWAGEE";
+import MachineLearning from "./Proj_ML";
 
-export default function Midterms_Index({ scrollTo: scrollToProp }) {
+export default function projectIndex({ scrollTo: scrollToProp }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [counts, setCounts] = useState({
-    Quizzes: 0,
-    Seatworks: 0,
-    Activities: 0,
-    Exams: 0,
+    javasql: 0,
+    pupease: 0,
+    kwagee: 0,
+    modelpy: 0,
   });
 
-  const quizzesRef = useRef(null);
-  const seatworksRef = useRef(null);
-  const activitiesRef = useRef(null);
-  const examsRef = useRef(null);
+  const javasqlRef = useRef(null);
+  const pupeaseRef = useRef(null);
+  const kwageeRef = useRef(null);
+  const modelpyRef = useRef(null);
 
   const refMap = {
-    quizzes: quizzesRef,
-    seatworks: seatworksRef,
-    activities: activitiesRef,
-    exams: examsRef,
+    javasql: javasqlRef,
+    pupease: pupeaseRef,
+    kwagee: kwageeRef,
+    modelpy: modelpyRef,
   };
 
   useEffect(() => {
@@ -41,10 +41,10 @@ export default function Midterms_Index({ scrollTo: scrollToProp }) {
   }, [scrollToProp]);
 
   const summaryCards = [
-    { label: "Quizzes", hash: "quizzes", countKey: "Quizzes" },
-    { label: "Seatworks", hash: "seatworks", countKey: "Seatworks" },
-    { label: "Activities", hash: "activities", countKey: "Activities" },
-    { label: "Exams", hash: "exams", countKey: "Exams" },
+    { label: "Programming Project", hash: "javasql", countKey: "javasql" },
+    { label: "UI Project", hash: "pupease", countKey: "pupease" },
+    { label: "Hackathon Project", hash: "kwagee", countKey: "kwagee" },
+    { label: "Machine Learning", hash: "modelpy", countKey: "modelpy" },
   ];
 
   const scrollTo = (ref) => {
@@ -56,7 +56,7 @@ export default function Midterms_Index({ scrollTo: scrollToProp }) {
       {/* Summary */}
       <section className="w-full h-auto">
         <div className="card">
-          <h2 className="section-title">Midterms: School Activities</h2>
+          <h2 className="section-title">Related Projects</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {summaryCards.map((item) => (
               <div
@@ -97,44 +97,36 @@ export default function Midterms_Index({ scrollTo: scrollToProp }) {
         </div>
       </section>
 
-      {/* QUIZZES + SEATWORKS */}
-      <section
-        className="w-full flex gap-5"
-        style={{
-          alignItems: "stretch",
-          flexDirection: isMobile ? "column" : "row",
-        }}
-      >
-        <QuizzesSection
-          sectionRef={quizzesRef}
-          onImageClick={setSelectedImage}
-          onCountChange={(count) =>
-            setCounts((prev) => ({ ...prev, Quizzes: count }))
-          }
-        />
-        <SeatworksSection
-          sectionRef={seatworksRef}
-          onImageClick={setSelectedImage}
-          onCountChange={(count) =>
-            setCounts((prev) => ({ ...prev, Seatworks: count }))
-          }
-        />
-      </section>
-
-      {/* ACTIVITIES */}
-      <ActivitiesSection
-        sectionRef={activitiesRef}
+      <JavaSQL
+        sectionRef={javasqlRef}
+        onImageClick={setSelectedImage}
         onCountChange={(count) =>
-          setCounts((prev) => ({ ...prev, Activities: count }))
+          setCounts((prev) => ({ ...prev, javasql: count }))
+        }
+      />
+
+      <PUPEase
+        sectionRef={pupeaseRef}
+        onImageClick={setSelectedImage}
+        onCountChange={(count) =>
+          setCounts((prev) => ({ ...prev, pupease: count }))
+        }
+      />
+
+      {/* Kwagee */}
+      <KwageeHackathon
+        sectionRef={kwageeRef}
+        onCountChange={(count) =>
+          setCounts((prev) => ({ ...prev, kwagee: count }))
         }
       />
 
       {/* EXAMS */}
-      <Mid_Exams
-        sectionRef={examsRef}
+      <MachineLearning
+        sectionRef={modelpyRef}
         onImageClick={setSelectedImage}
         onCountChange={(count) =>
-          setCounts((prev) => ({ ...prev, Exams: count }))
+          setCounts((prev) => ({ ...prev, modelpy: count }))
         }
       />
     </>

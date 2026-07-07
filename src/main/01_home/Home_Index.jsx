@@ -4,12 +4,13 @@ import { MdVerified } from "react-icons/md";
 import { HiOutlineDocumentText, HiOutlineMail } from "react-icons/hi";
 import onebyone from "../../assets/onebyone.jpg";
 import darkonebyone from "../../assets/dark.png";
-import cvPDF from "../../assets/cvtan.pdf";
+import cvPDF from "../../assets/RESUME.pdf";
 import About from "./Introduction";
 import TableOfContents from "./TableOfContents";
 import Experience from "./Experience";
-import RecentProjects from "./SchoolProjects";
-import RecentCertifications from "./RecentCertifications";
+import RecentCert from "./RecentCert";
+import TechStack from "./TechStack";
+import RecentProj from "./RecentProj";
 import Contact from "./Contact";
 import Gallery from "./Gallery";
 
@@ -39,9 +40,11 @@ export default function Home_Index({ darkMode, onPageChange }) {
             <CiLocationOn className="location-icon" />
             Valenzuela City, Philippines
           </p>
-          <div className="job-title">Course: Object-Oriented Programming</div>
+          <div className="job-title">
+            Polytechnic University of the Philippines
+          </div>
           <div className="info-title">
-            Section and School: BSIT 2-4 | PUP Manila
+            Bachelor of Science in Information Technology
           </div>
           <div className="action-buttons">
             <a
@@ -77,17 +80,19 @@ export default function Home_Index({ darkMode, onPageChange }) {
       <Gallery />
 
       <div className="projects-cert-grid" ref={projectsCertRef}>
-        <RecentProjects />
-        <RecentCertifications />
+        <RecentCert />
+        <TechStack />
       </div>
+
+      <RecentProj />
 
       <Contact />
 
       <footer className="footer">
         <div className="footer-line"></div>
         <p className="footer-text">
-          © {new Date().getFullYear()} Migel H. Tan - Submitted to Sir Severino
-          Bedis - In partial fulfillment of COMP 009 OOP
+          © {new Date().getFullYear()} Migel H. Tan - Portfolio Website. All
+          rights reserved.
         </p>
       </footer>
     </>
