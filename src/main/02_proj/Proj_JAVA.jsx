@@ -8,6 +8,10 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaPlay,
+  FaUserTie,
+  FaRoute,
+  FaTimes,
+  FaInfoCircle,
 } from "react-icons/fa";
 import act1 from "../../images/multimedia/img4.jpg";
 import docu from "../../assets/documentation/pagconnect.pdf";
@@ -38,7 +42,7 @@ const javasql = [
     poster: pagConnectWalkthrough[0],
     images: pagConnectWalkthrough,
     captions: [<strong>Pag-CONNECT Photo Walkthrough</strong>],
-    description: (
+    overview: (
       <>
         <strong>Pag-CONNECT:</strong> A database-driven membership registration
         platform inspired by the Pag-IBIG Member's Data Form (MDF). Developed
@@ -48,13 +52,22 @@ const javasql = [
         for efficient record maintenance. The project demonstrates practical
         applications of relational database design, CRUD operations, and
         full-stack software development.
-        <br />
-        <br />
-        <strong>Role:</strong> Lead Developer and Database Designer. I was
-        responsible for designing the database schema together with my team, and
-        integrating MySQL for data storage and retrieval. I also ensured that
-        the system adhered to best practices in software development and user
-        experience.
+      </>
+    ),
+    role: (
+      <>
+        Lead Developer and Database Designer. I was responsible for designing
+        the database schema together with my team, and integrating MySQL for
+        data storage and retrieval. I also ensured that the system adhered to
+        best practices in software development and user experience.
+      </>
+    ),
+    walkthroughNote: (
+      <>
+        The first image in the walkthrough shows the login screen, followed by
+        the modular dashboard, then the modules that the applicant needs to fill
+        out. Then, we can see the administrative dashboard. Each step
+        demonstrates the system's functionality and user interface.
       </>
     ),
     githubUrl: "https://github.com/migeltan/Pag-IBIG-OOP.git", // TODO: replace with your repo link
@@ -122,6 +135,14 @@ function tk(dark) {
     btnPrimaryText: dark ? "#1c1e21" : "#ffffff",
     btnSecondaryBg: dark ? "#1a1d27" : "#ffffff",
     btnSecondaryBorder: dark ? "#3a3f55" : "#dddfe2",
+    // Stronger frame borders/shadows so media panels read as distinct
+    // contained "device frames" rather than blending into the card bg.
+    frameBorder: dark ? "#3d4256" : "#c7cbd6",
+    frameShadow: dark
+      ? "0 6px 20px rgba(0,0,0,0.5)"
+      : "0 6px 20px rgba(0,0,0,0.12)",
+    calloutBg: dark ? "#171a24" : "#f7f8fa",
+    calloutBorder: dark ? "#2a2d3a" : "#e9eaee",
     shadowRest: dark
       ? "0 1px 6px rgba(0,0,0,0.5)"
       : "0 1px 4px rgba(0,0,0,0.06)",
@@ -184,6 +205,8 @@ function useIsMobile(breakpoint = 720) {
 }
 
 // ── Video demo slot ──────────────────────────────────────────────
+// Full panel width, height controlled by the aspect-ratio. The stronger
+// frame border/shadow keeps it reading as a contained panel.
 function VideoDemo({ video, poster, t }) {
   const isYouTube = video && /youtube\.com|youtu\.be/.test(video);
 
@@ -195,7 +218,8 @@ function VideoDemo({ video, poster, t }) {
         aspectRatio: "16 / 9",
         borderRadius: "8px",
         overflow: "hidden",
-        border: `1px solid ${t.cardBorder}`,
+        border: `1px solid ${t.frameBorder}`,
+        boxShadow: t.frameShadow,
         background: t.mediaBg,
       }}
     >
@@ -275,7 +299,7 @@ function VideoDemo({ video, poster, t }) {
 }
 
 // ── Walkthrough stepper — crossfades between screenshots, no flips ─
-function WalkthroughStepper({ images, captions = [], t }) {
+function WalkthroughStepper({ images, captions = [], t, stretch = false }) {
   const n = images.length;
   const [current, setCurrent] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -329,17 +353,23 @@ function WalkthroughStepper({ images, captions = [], t }) {
       onMouseLeave={() => {
         pausedRef.current = false;
       }}
-      style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        height: stretch ? "100%" : "auto",
+      }}
     >
       <div
         onClick={() => setLightboxOpen(true)}
         style={{
           position: "relative",
           width: "100%",
-          aspectRatio: "4 / 3",
+          ...(stretch ? { flex: 1, minHeight: 0 } : { aspectRatio: "4 / 3" }),
           borderRadius: "8px",
           overflow: "hidden",
-          border: `1px solid ${t.cardBorder}`,
+          border: `1px solid ${t.frameBorder}`,
+          boxShadow: t.frameShadow,
           background: t.mediaBg,
           cursor: "zoom-in",
         }}
@@ -414,6 +444,7 @@ function WalkthroughStepper({ images, captions = [], t }) {
             lineHeight: 1.5,
             color: t.subText,
             textAlign: "center",
+            flexShrink: 0,
           }}
         >
           {captions[current]}
@@ -421,7 +452,14 @@ function WalkthroughStepper({ images, captions = [], t }) {
       )}
 
       {n > 1 && (
-        <div style={{ display: "flex", justifyContent: "center", gap: "6px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "6px",
+            flexShrink: 0,
+          }}
+        >
           {images.map((_, i) => (
             <button
               key={i}
@@ -477,9 +515,157 @@ function WalkthroughStepper({ images, captions = [], t }) {
   );
 }
 
-function ActionButton({ href, icon: Icon, label, variant, t, download }) {
+// ── Inline PDF preview modal ─────────────────────────────────────
+// Opens the documentation PDF inline via an <iframe>, mirroring the
+// image lightbox pattern, so it always renders regardless of what the
+// visitor's browser would otherwise do with a raw PDF link.
+function PdfPreviewModal({ pdfUrl, onClose, t }) {
+  return createPortal(
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.75)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 99999,
+        padding: "2rem 1rem",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "min(900px, 100%)",
+          height: "100%",
+          maxHeight: "88vh",
+          background: t.cardBg,
+          borderRadius: "10px",
+          overflow: "hidden",
+          border: `1px solid ${t.frameBorder}`,
+          boxShadow: t.frameShadow,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "10px 14px",
+            borderBottom: `1px solid ${t.titleBarBorder}`,
+            background: t.titleBarBg,
+          }}
+        >
+          <span
+            style={{
+              fontSize: "0.85rem",
+              fontWeight: 700,
+              color: t.heading,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <FaBookOpen /> Documentation
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <a
+              href={pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: "0.78rem",
+                fontWeight: 600,
+                color: t.subText,
+                textDecoration: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <FaDownload /> Open raw file
+            </a>
+            <button
+              onClick={onClose}
+              aria-label="Close documentation preview"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                border: "none",
+                background: t.chipBg,
+                color: t.heading,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <FaTimes />
+            </button>
+          </div>
+        </div>
+        <iframe
+          src={pdfUrl}
+          title="Documentation preview"
+          style={{ flex: 1, width: "100%", border: "none" }}
+        />
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+function ActionButton({
+  href,
+  onClick,
+  icon: Icon,
+  label,
+  variant,
+  t,
+  download,
+}) {
   const [hovered, setHovered] = useState(false);
   const primary = variant === "primary";
+
+  const sharedStyle = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "9px 16px",
+    borderRadius: "8px",
+    fontSize: "0.85rem",
+    fontWeight: 600,
+    textDecoration: "none",
+    border: primary
+      ? `1px solid ${t.btnPrimaryBg}`
+      : `1px solid ${t.btnSecondaryBorder}`,
+    background: primary ? t.btnPrimaryBg : t.btnSecondaryBg,
+    color: primary ? t.btnPrimaryText : t.heading,
+    transform: hovered ? "translateY(-2px)" : "translateY(0px)",
+    boxShadow: hovered ? t.shadowHover : "none",
+    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+    cursor: "pointer",
+  };
+
+  // Buttons that trigger an in-page action (like the PDF preview modal)
+  // render as <button>; everything else stays a real link.
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={sharedStyle}
+      >
+        <Icon style={{ fontSize: "0.95rem" }} />
+        {label}
+      </button>
+    );
+  }
 
   return (
     <a
@@ -489,24 +675,7 @@ function ActionButton({ href, icon: Icon, label, variant, t, download }) {
       download={download}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "8px",
-        padding: "9px 16px",
-        borderRadius: "8px",
-        fontSize: "0.85rem",
-        fontWeight: 600,
-        textDecoration: "none",
-        border: primary
-          ? `1px solid ${t.btnPrimaryBg}`
-          : `1px solid ${t.btnSecondaryBorder}`,
-        background: primary ? t.btnPrimaryBg : t.btnSecondaryBg,
-        color: primary ? t.btnPrimaryText : t.heading,
-        transform: hovered ? "translateY(-2px)" : "translateY(0px)",
-        boxShadow: hovered ? t.shadowHover : "none",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-      }}
+      style={sharedStyle}
     >
       <Icon style={{ fontSize: "0.95rem" }} />
       {label}
@@ -521,13 +690,16 @@ function ExamPanel({
   poster,
   images,
   captions,
-  description,
+  overview,
+  role,
+  walkthroughNote,
   githubUrl,
   docUrl,
   jarUrl,
   t,
 }) {
   const [hovered, setHovered] = useState(false);
+  const [pdfOpen, setPdfOpen] = useState(false);
   const isMobile = useIsMobile(720);
 
   return (
@@ -608,52 +780,184 @@ function ExamPanel({
               </div>
             )}
 
-            {description && (
-              <p
+            {overview && (
+              <div
                 style={{
-                  color: t.subText,
-                  margin: 0,
-                  fontSize: "0.85rem",
-                  lineHeight: 1.75,
+                  display: "flex",
+                  gap: "10px",
+                  padding: "12px 14px",
+                  borderRadius: "8px",
+                  background: t.calloutBg,
+                  border: `1px solid ${t.calloutBorder}`,
                 }}
               >
-                {description}
-              </p>
+                <FaInfoCircle
+                  style={{
+                    fontSize: "0.95rem",
+                    color: t.heading,
+                    marginTop: "2px",
+                    flexShrink: 0,
+                  }}
+                />
+                <div>
+                  <p
+                    style={{
+                      margin: "0 0 3px 0",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      color: t.heading,
+                    }}
+                  >
+                    Overview
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "0.85rem",
+                      lineHeight: 1.75,
+                      color: t.subText,
+                    }}
+                  >
+                    {overview}
+                  </p>
+                </div>
+              </div>
             )}
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-              <ActionButton
-                href={githubUrl}
-                icon={FaGithub}
-                label="View Code"
-                variant="primary"
-                t={t}
-              />
-              {docUrl && (
-                <ActionButton
-                  href={docUrl}
-                  icon={FaBookOpen}
-                  label="Documentation"
-                  variant="secondary"
-                  t={t}
+            {role && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  padding: "12px 14px",
+                  borderRadius: "8px",
+                  background: t.calloutBg,
+                  border: `1px solid ${t.calloutBorder}`,
+                }}
+              >
+                <FaUserTie
+                  style={{
+                    fontSize: "0.95rem",
+                    color: t.heading,
+                    marginTop: "2px",
+                    flexShrink: 0,
+                  }}
                 />
-              )}
-              {jarUrl && (
-                <ActionButton
-                  href={jarUrl}
-                  icon={FaDownload}
-                  label="Download .jar"
-                  variant="secondary"
-                  t={t}
-                  download="PagConnect.jar"
+                <div>
+                  <p
+                    style={{
+                      margin: "0 0 3px 0",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      color: t.heading,
+                    }}
+                  >
+                    My Role
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "0.85rem",
+                      lineHeight: 1.65,
+                      color: t.subText,
+                    }}
+                  >
+                    {role}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {walkthroughNote && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  padding: "12px 14px",
+                  borderRadius: "8px",
+                  background: t.calloutBg,
+                  border: `1px solid ${t.calloutBorder}`,
+                }}
+              >
+                <FaRoute
+                  style={{
+                    fontSize: "0.95rem",
+                    color: t.heading,
+                    marginTop: "2px",
+                    flexShrink: 0,
+                  }}
                 />
-              )}
-            </div>
+                <div>
+                  <p
+                    style={{
+                      margin: "0 0 3px 0",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      color: t.heading,
+                    }}
+                  >
+                    Reading the Walkthrough
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "0.85rem",
+                      lineHeight: 1.65,
+                      color: t.subText,
+                    }}
+                  >
+                    {walkthroughNote}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
-          <WalkthroughStepper images={images} captions={captions} t={t} />
+          <WalkthroughStepper
+            images={images}
+            captions={captions}
+            t={t}
+            stretch={!isMobile}
+          />
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+          <ActionButton
+            href={githubUrl}
+            icon={FaGithub}
+            label="View Code"
+            variant="primary"
+            t={t}
+          />
+          {docUrl && (
+            <ActionButton
+              onClick={() => setPdfOpen(true)}
+              icon={FaBookOpen}
+              label="Documentation"
+              variant="secondary"
+              t={t}
+            />
+          )}
+          {jarUrl && (
+            <ActionButton
+              href={jarUrl}
+              icon={FaDownload}
+              label="Download .jar"
+              variant="secondary"
+              t={t}
+              download="PagConnect.jar"
+            />
+          )}
         </div>
       </div>
+
+      {pdfOpen && (
+        <PdfPreviewModal
+          pdfUrl={docUrl}
+          onClose={() => setPdfOpen(false)}
+          t={t}
+        />
+      )}
     </div>
   );
 }
