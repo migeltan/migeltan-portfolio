@@ -178,6 +178,7 @@ function CardDeck({ items, t, onSelect }) {
 
   const styleForIndex = (i) => {
     const isFront = i === currentIndex && i !== leavingIndex;
+    const isLeaving = i === leavingIndex;
 
     const base = {
       position: "absolute",
@@ -188,55 +189,38 @@ function CardDeck({ items, t, onSelect }) {
       overflow: "hidden",
       display: "flex",
       flexDirection: "column",
-      transition: `transform ${FLIP_DURATION}ms cubic-bezier(0.4, 0.05, 0.2, 1), opacity ${FLIP_DURATION}ms ease, box-shadow 0.25s ease`,
-      transformStyle: "preserve-3d",
-      backfaceVisibility: "hidden",
-      willChange: "transform, opacity",
+      transition: `opacity ${FLIP_DURATION}ms ease, transform ${FLIP_DURATION}ms ease, box-shadow 0.25s ease`,
       cursor: isFront ? "pointer" : "default",
     };
 
-    // The card currently flipping away to the back of the deck.
-    if (i === leavingIndex) {
+    if (isFront) {
       return {
         ...base,
-        transform: "translateY(18px) scale(0.82) rotateY(-180deg)",
-        opacity: 0,
-        zIndex: 5,
-        boxShadow: "none",
-      };
-    }
-
-    const delta = (i - currentIndex + n) % n;
-
-    if (delta === 0) {
-      return {
-        ...base,
-        transform: hoveredFront
-          ? "translateY(-6px) scale(1) rotateY(0deg)"
-          : "translateY(0) scale(1) rotateY(0deg)",
         opacity: 1,
-        zIndex: 30,
+        transform: hoveredFront
+          ? "translateY(-6px) scale(1)"
+          : "translateY(0px) scale(1)",
+        zIndex: 20,
         boxShadow: hoveredFront ? t.shadowHover : t.shadowRest,
       };
     }
 
-    if (delta <= MAX_PEEK) {
-      const step = delta; // 1, 2, ...
+    if (isLeaving) {
       return {
         ...base,
-        transform: `translateY(${-10 * step}px) scale(${1 - 0.06 * step}) rotateY(0deg)`,
-        opacity: Math.max(0.35, 1 - 0.35 * step),
-        zIndex: 30 - step,
+        opacity: 0,
+        transform: "translateY(0px) scale(0.97)",
+        zIndex: 10,
         boxShadow: "none",
         pointerEvents: "none",
       };
     }
 
-    // Anything further back stays fully hidden, ready to appear later.
+    // Everything else stays fully hidden and non-interactive.
     return {
       ...base,
-      transform: `translateY(${-10 * MAX_PEEK}px) scale(${1 - 0.06 * (MAX_PEEK + 1)}) rotateY(0deg)`,
       opacity: 0,
+      transform: "translateY(0px) scale(0.97)",
       zIndex: 1,
       boxShadow: "none",
       pointerEvents: "none",
@@ -249,6 +233,8 @@ function CardDeck({ items, t, onSelect }) {
       onMouseLeave={() => pauseAutoAdvance(0)}
       style={{
         position: "relative",
+        maxWidth: "620px",
+        margin: "0 auto",
         padding: "20px 46px",
       }}
     >
@@ -280,8 +266,8 @@ function CardDeck({ items, t, onSelect }) {
       <div
         style={{
           position: "relative",
-          minHeight: "300px",
-          perspective: "1200px",
+          width: "100%",
+          aspectRatio: "16 / 10",
         }}
       >
         {items.map((item, i) => {

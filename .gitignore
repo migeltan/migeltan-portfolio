@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+#jar file
+public/pagibigapp.jar
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
