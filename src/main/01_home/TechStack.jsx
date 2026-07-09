@@ -435,6 +435,7 @@ export default function TechStack() {
   return (
     <section
       ref={sectionRef}
+      id="foundation"
       className="card"
       style={{
         display: "flex",

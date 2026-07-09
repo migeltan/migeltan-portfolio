@@ -246,6 +246,7 @@ export default function Contact() {
   return (
     <section
       ref={sectionRef}
+      id="more-about-me"
       className="card about-me-section"
       style={{
         opacity: inView ? 1 : 0,

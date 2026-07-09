@@ -13,36 +13,35 @@ import {
 } from "react-icons/fa";
 import act1 from "../../images/multimedia/img4.jpg";
 
-// ── Project data ─────────────────────────────────────────────────
-// prototypeUrl: paste your Figma "Share > Prototype" link here (a
-// normal https://www.figma.com/proto/... link is fine — it gets
-// auto-wrapped into an embeddable URL below; an already-embeddable
-// embed.figma.com link is used as-is). Leave null to show the "Live
-// prototype coming soon" placeholder instead.
-// images: walkthrough screenshots, in the order you want them stepped
-// through. Currently just the placeholder — swap in real exported
-// frames whenever you have them. captions are optional and line up
-// by index.
-// figmaUrl / docUrl: leave null to hide those buttons until you have
-// links ready.
+const walkthroughModules = import.meta.glob(
+  "../../assets/walkthrough/figma/*.{png,jpg,jpeg,webp}",
+  { eager: true },
+);
+
+const pupEaseWalkthrough = Object.keys(walkthroughModules)
+  .sort(
+    (a, b) => a.localeCompare(b, undefined, { numeric: true }), // so 2.png comes before 10.png
+  )
+  .map((path) => walkthroughModules[path].default);
+
 const pupease = [
   {
     id: 1,
-    name: "PUP-Ease: UI/UX for the Online Document Request System of Polytechnic University of the Philippines using Figma",
+    name: "PUPEase: UI/UX for the Online Document Request System of Polytechnic University of the Philippines using Figma",
     tags: ["Figma", "UI/UX", "Prototyping", "HCI"],
     prototypeUrl:
       "https://embed.figma.com/proto/OmIi8f8BeI9BgsvJtHu2LP/HCI---PUP-ODRS?node-id=1-3&starting-point-node-id=1%3A3&embed-host=share",
-    poster: act1,
-    images: [act1], // TODO: replace with real walkthrough screenshots
-    captions: [<strong>PUP-Ease Photo Walkthrough</strong>],
+    poster: pupEaseWalkthrough[0],
+    images: pupEaseWalkthrough,
+    captions: [<strong>PUPEase Photo Walkthrough</strong>],
     overview: (
       <>
-        <strong>PUP-Ease:</strong> A user interface and user experience design
-        for the Online Document Request System (ODRS) of the Polytechnic
-        University of the Philippines. Applying principles from Human-Computer
-        Interaction, our team redesigned a more intuitive, user-friendly
-        interface for the existing ODRS platform, prototyped end-to-end in
-        Figma.
+        <strong>PUPEase:</strong> A high fidelity prototype design for the
+        <strong> Online Document Request System (ODRS)</strong> of the
+        Polytechnic University of the Philippines. Applying principles from
+        Human-Computer Interaction, our team redesigned a more intuitive,
+        user-friendly interface for the existing ODRS platform, prototyped
+        end-to-end in Figma.
       </>
     ),
     role: (
@@ -54,7 +53,7 @@ const pupease = [
     ),
     prototypeNote: (
       <>
-        The prototype opens on the PUP-Ease splash screen — tap{" "}
+        The prototype opens on the PUPEase splash screen tap{" "}
         <strong>Get Started</strong> to move into the login flow, then continue
         through registration and on into the dashboard to see how the
         document-request modules connect together.
@@ -191,10 +190,12 @@ function useIsMobile(breakpoint = 720) {
 }
 
 // ── Live Figma prototype slot ────────────────────────────────────
-// Desktop: a moderate portrait aspect ratio (not the full 9:16 a real
-// phone would be) so it reads as a nicely sized preview rather than
-// dominating the whole column — leaves room for the walkthrough
-// photos underneath the boxes on the other side.
+// Desktop: flexes to fill whatever height the left column ends up
+// with, so it always matches the walkthrough photo on the right —
+// including as the description boxes above grow with longer text.
+// The larger 520px baseline keeps it (and the photo) comfortably big
+// instead of squeezed. Sits inside a fixed-height footer wrapper (see
+// ExamPanel) so its bottom edge lines up exactly with the photo's.
 // Mobile: bleeds full-width edge-to-edge with no border/shadow/box —
 // reads like a real device screen instead of a boxed thumbnail.
 function FigmaPrototypeEmbed({ prototypeUrl, poster, t, isMobile }) {
@@ -223,7 +224,8 @@ function FigmaPrototypeEmbed({ prototypeUrl, poster, t, isMobile }) {
     : {
         position: "relative",
         width: "100%",
-        aspectRatio: "4 / 5",
+        flex: "1 1 520px",
+        minHeight: "480px",
         borderRadius: "8px",
         overflow: "hidden",
         border: `1px solid ${t.frameBorder}`,
@@ -300,6 +302,9 @@ function FigmaPrototypeEmbed({ prototypeUrl, poster, t, isMobile }) {
 // ── Walkthrough stepper — crossfades between screenshots, no flips ─
 // Sits beneath the description boxes and, when `stretch` is on, grows
 // to fill whatever height is left over next to the prototype column.
+// The image portion itself is the flexible part; caption/dots live in
+// a fixed-height footer (see ExamPanel) so the box's bottom edge lines
+// up with the prototype's, regardless of caption length or dot count.
 function WalkthroughStepper({ images, captions = [], t, stretch = false }) {
   const n = images.length;
   const [current, setCurrent] = useState(0);
@@ -358,7 +363,7 @@ function WalkthroughStepper({ images, captions = [], t, stretch = false }) {
         display: "flex",
         flexDirection: "column",
         gap: "10px",
-        ...(stretch ? { flex: "1 1 200px", minHeight: 0 } : {}),
+        ...(stretch ? { flex: "1 1 520px", minHeight: "480px" } : {}),
       }}
     >
       <div
@@ -366,7 +371,9 @@ function WalkthroughStepper({ images, captions = [], t, stretch = false }) {
         style={{
           position: "relative",
           width: "100%",
-          ...(stretch ? { flex: 1, minHeight: 0 } : { aspectRatio: "4 / 3" }),
+          ...(stretch
+            ? { flex: 1, minHeight: "420px" }
+            : { aspectRatio: "4 / 3" }),
           borderRadius: "8px",
           overflow: "hidden",
           border: `1px solid ${t.frameBorder}`,
@@ -688,6 +695,12 @@ function ExamPanel({
   const [pdfOpen, setPdfOpen] = useState(false);
   const isMobile = useIsMobile(720);
 
+  // Fixed-height footer for whatever sits under each media box (tags
+  // under the prototype, caption + dots under the photo) so both
+  // boxes' bottom edges land on the same line instead of drifting
+  // apart based on how much footer content each side happens to have.
+  const FOOTER_HEIGHT = 44;
+
   const CalloutBox = ({ icon: Icon, label, children }) => (
     <div
       style={{
@@ -833,7 +846,16 @@ function ExamPanel({
             />
 
             {tags.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "6px",
+                  flexShrink: 0,
+                  minHeight: isMobile ? "auto" : `${FOOTER_HEIGHT}px`,
+                }}
+              >
                 {tags.map((tag) => (
                   <span
                     key={tag}
@@ -875,12 +897,47 @@ function ExamPanel({
             )}
 
             {images?.length > 0 && (
-              <WalkthroughStepper
-                images={images}
-                captions={captions}
-                t={t}
-                stretch={!isMobile}
-              />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: isMobile ? "0 0 auto" : "1 1 auto",
+                  minHeight: 0,
+                  gap: "14px",
+                }}
+              >
+                <WalkthroughStepper
+                  images={images}
+                  captions={[]}
+                  t={t}
+                  stretch={!isMobile}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    flexShrink: 0,
+                    minHeight: isMobile ? "auto" : `${FOOTER_HEIGHT}px`,
+                  }}
+                >
+                  {captions[0] && (
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "0.75rem",
+                        lineHeight: 1.5,
+                        color: t.subText,
+                        textAlign: "center",
+                      }}
+                    >
+                      {captions[0]}
+                    </p>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -938,7 +995,7 @@ export default function PUPEase({ sectionRef, onCountChange }) {
         >
           <FaFigma style={{ fontSize: "1.3rem", color: t.heading }} />
           <h2 className="section-title" style={{ margin: 0, color: t.heading }}>
-            Project #2: UI/UX Using Figma
+            Project #2: High Fidelity Prototype Using Figma
           </h2>
         </div>
         <div style={{ width: "100%", padding: "16px" }}>

@@ -17,7 +17,7 @@ import act1 from "../../images/multimedia/img4.jpg";
 import docu from "../../assets/documentation/pagconnect.pdf";
 
 const walkthroughModules = import.meta.glob(
-  "../../assets/walkthrough/*.{png,jpg,jpeg,webp}",
+  "../../assets/walkthrough/java/*.{png,jpg,jpeg,webp}",
   { eager: true },
 );
 
@@ -37,7 +37,14 @@ const javasql = [
   {
     id: 1,
     name: "Pag-CONNECT: A Digital Registration System of Pag-IBIG Membership Fund using Java",
-    tags: ["Java", "Swing", "MySQL", "CRUD"],
+    tags: [
+      "Java",
+      "Swing",
+      "MySQL",
+      "CRUD",
+      "Object-Oriented Programming",
+      "Normalization",
+    ],
     video: null, // TODO: add a demo video URL
     poster: pagConnectWalkthrough[0],
     images: pagConnectWalkthrough,

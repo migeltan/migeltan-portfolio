@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { PiFlask } from "react-icons/pi";
+import { IoPersonOutline, IoInformationCircleOutline } from "react-icons/io5";
+import { PiStudent, PiBuildings } from "react-icons/pi";
+import { FaCode, FaFigma, FaGlobe, FaBrain } from "react-icons/fa6";
+import { FaGithub, FaLinkedin, FaEnvelope, FaFacebook } from "react-icons/fa";
 
 const TrafficLights = ({ size = 12 }) => (
   <span
@@ -59,11 +63,9 @@ function useTheme() {
   return dark;
 }
 
-// Fires once, the first time the element scrolls into view.
 function useInView(threshold = 0.15) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
-
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
@@ -79,7 +81,6 @@ function useInView(threshold = 0.15) {
     observer.observe(node);
     return () => observer.disconnect();
   }, [threshold]);
-
   return [ref, inView];
 }
 
@@ -95,6 +96,7 @@ function tk(dark) {
     btnBg: dark ? "#161b22" : "#fafafa",
     btnBorder: dark ? "#30363d" : "#e5e7eb",
     btnHoverBg: dark ? "#21262d" : "#f0f0f0",
+    btnIcon: dark ? "#8b949e" : "#65676b",
     placeholderBorder: dark ? "#30363d" : "#d1d5db",
     panelShadowHover: dark
       ? "0 12px 24px rgba(0,0,0,0.5)"
@@ -102,24 +104,30 @@ function tk(dark) {
   };
 }
 
+// NOTE: every Dashboard item now carries a scrollTo id — make sure the
+// matching section in your page has that exact id attribute.
 const tableOfContents = [
   {
     category: "Dashboard",
     items: [
-      { label: "Introduction", component: null, props: {} },
+      {
+        label: "Introduction",
+        icon: IoPersonOutline,
+        props: { scrollTo: "Introduction" },
+      },
       {
         label: "Life @ PUP",
-        component: null,
+        icon: PiStudent,
         props: { scrollTo: "life-at-pup" },
       },
       {
         label: "Foundation",
-        component: null,
+        icon: PiBuildings,
         props: { scrollTo: "foundation" },
       },
       {
         label: "More About Me!",
-        component: null,
+        icon: IoInformationCircleOutline,
         props: { scrollTo: "more-about-me" },
       },
     ],
@@ -127,16 +135,16 @@ const tableOfContents = [
   {
     category: "Projects",
     items: [
-      { label: "Programming", component: null, props: { scrollTo: "javasql" } },
-      { label: "UI/UX", component: null, props: { scrollTo: "figma" } },
+      { label: "Programming", icon: FaCode, props: { scrollTo: "javasql" } },
+      { label: "UI/UX", icon: FaFigma, props: { scrollTo: "figma" } },
       {
         label: "Web Development",
-        component: null,
+        icon: FaGlobe,
         props: { scrollTo: "kwagee" },
       },
       {
         label: "Machine Learning",
-        component: null,
+        icon: FaBrain,
         props: { scrollTo: "machinelearning" },
       },
     ],
@@ -144,10 +152,10 @@ const tableOfContents = [
   {
     category: "Contacts",
     items: [
-      { label: "GitHub", component: null, props: {} },
-      { label: "LinkedIn", component: null, props: {} },
-      { label: "Email", component: null, props: {} },
-      { label: "Facebook", component: null, props: {} },
+      { label: "GitHub", icon: FaGithub, props: {} },
+      { label: "LinkedIn", icon: FaLinkedin, props: {} },
+      { label: "Email", icon: FaEnvelope, props: {} },
+      { label: "Facebook", icon: FaFacebook, props: {} },
     ],
   },
 ];
@@ -159,17 +167,16 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
   const [sectionRef, inView] = useInView(0.1);
   const [hoveredPanel, setHoveredPanel] = useState(null);
 
-  const handleClick = (category, label, props) => {
+  const handleClick = (category, props) => {
     if (category === "Projects") {
+      // Switches to the Projects page; that page is responsible for
+      // reading props.scrollTo and scrolling to it on mount.
       onPageChange("Projects", props);
     } else if (category === "Contacts") {
       onPageChange("Contacts", {});
-    } else if (category === "Home" || category === "Dashboard") {
-      if (label === "Introduction") {
-        onScrollTo("introduction");
-      } else if (label === "Additional Information") {
-        onScrollTo("projects-cert");
-      }
+    } else {
+      // Dashboard — scroll within the current page
+      if (props.scrollTo) onScrollTo(props.scrollTo);
     }
   };
 
@@ -266,11 +273,14 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
                   gap: "clamp(6px, 2vw, 10px)",
                 }}
               >
-                {items.map(({ label, props }) => (
+                {items.map(({ label, icon: Icon, props }) => (
                   <button
                     key={label}
-                    onClick={() => handleClick(category, label, props)}
+                    onClick={() => handleClick(category, props)}
                     style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
                       textAlign: "left",
                       fontSize: "clamp(0.62rem, 2.6vw, 0.85rem)",
                       fontWeight: 600,
@@ -283,7 +293,6 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
                       transition: "background 0.2s",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
-                      textOverflow: "ellipsis",
                     }}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background = t.btnHoverBg)
@@ -292,7 +301,18 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
                       (e.currentTarget.style.background = t.btnBg)
                     }
                   >
-                    {label}
+                    <Icon
+                      style={{
+                        fontSize: "1em",
+                        color: t.btnIcon,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span
+                      style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                    >
+                      {label}
+                    </span>
                   </button>
                 ))}
 

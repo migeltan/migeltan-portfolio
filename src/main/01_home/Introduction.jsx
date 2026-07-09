@@ -39,14 +39,21 @@ export default function Introduction() {
         </h2>
       </div>
 
-      <p className="text-content">
-        Hi, I'm Migel H. Tan, an Information Technology student at the
-        Polytechnic University of the Philippines with a growing focus on
-        artificial intelligence, software engineering, and data analytics. I
-        enjoy building applications that solve meaningful problems, whether
+      <p className="text-content" style={{ marginBottom: "12px" }}>
+        Hi,{" "}
+        <strong> I'm Migel H. Tan, an Information Technology student </strong>{" "}
+        at the Polytechnic University of the Philippines with a growing focus on
+        artificial intelligence, software engineering, and data analytics.
+      </p>
+
+      <p className="text-content" style={{ marginBottom: "12px" }}>
+        I enjoy building applications that solve meaningful problems, whether
         through web development, machine learning, or database-driven systems.
         My experiences in hackathons, academic projects, and leadership roles
         have strengthened both my technical foundation and collaborative skills.
+      </p>
+
+      <p className="text-content">
         Feel free to explore my portfolio to learn more about my projects,
         experiences, and the technologies I'm currently working with as I
         continue pursuing opportunities in software development and emerging

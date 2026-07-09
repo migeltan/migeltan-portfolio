@@ -376,6 +376,7 @@ export default function Gallery() {
   return (
     <section
       ref={sectionRef}
+      id="life-at-pup"
       className="card connect-container gallery-section w-full"
       style={{
         opacity: inView ? 1 : 0,
