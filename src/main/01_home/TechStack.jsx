@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { MdOutlineVerified } from "react-icons/md";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-import C from "../../images/tech_stack/C.svg";
+import c from "../../images/tech_stack/C.svg";
 import java from "../../images/tech_stack/java.svg";
 import mysql from "../../images/tech_stack/mysql.svg";
 import python from "../../images/tech_stack/python.svg";
