@@ -3,7 +3,7 @@ import Portfolio from "./Portfolio";
 
 function App() {
   return (
-    <Router>
+    <Router basename="/migeltan-portfolio">
       <Routes>
         <Route path="/" element={<Portfolio />} />
       </Routes>
