@@ -136,7 +136,7 @@ const techStack = [
   {
     category: "Programming & Database",
     items: [
-      { name: "C", label: "C", icon: C },
+      { name: "C", label: "C", icon: c },
       { name: "COBOL", label: "Cb", icon: cob },
       { name: "Java", label: "J", icon: java },
       { name: "MySQL", label: "MySQL", icon: mysql },
@@ -147,7 +147,7 @@ const techStack = [
   {
     category: "Web Development & UI/UX",
     items: [
-      { name: "CSS", label: "C", icon: css },
+      { name: "CSS", label: "Css", icon: css },
       { name: "Figma", label: "Fi", icon: figma },
       { name: "HTML", label: "H", icon: html },
       { name: "JavaScript", label: "JS", icon: js },
