@@ -48,10 +48,21 @@ export default function Experience() {
               Polytechnic University of the Philippines
             </h3>
             <p className="exp-company">
-              Bachelor of Science in Information Technology Sophomore
+              Bachelor of Science in Information Technology Junior
             </p>
           </div>
           <span className="exp-year">Present</span>
+        </div>
+
+        <div className="exp-item">
+          <div className="exp-dot"></div>
+          <div className="exp-content">
+            <h3 className="exp-title">TESDA Scholar</h3>
+            <p className="exp-company">
+              Training for AI Automation with a National Certificate Level III
+            </p>
+          </div>
+          <span className="exp-year">2026</span>
         </div>
 
         <div className="exp-item">
@@ -103,7 +114,7 @@ export default function Experience() {
           <div className="exp-content">
             <h3 className="exp-title">Our Lady of Fatima Univeristy</h3>
             <p className="exp-company">
-              STEM Strand - Graduated with high honors.
+              STEM Strand - Graduated with high honors
             </p>
           </div>
           <span className="exp-year">2024</span>

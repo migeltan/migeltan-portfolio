@@ -4,7 +4,7 @@ import { MdVerified } from "react-icons/md";
 import { HiOutlineDocumentText, HiOutlineMail } from "react-icons/hi";
 import onebyone from "../../assets/onebyone.jpg";
 import darkonebyone from "../../assets/dark.png";
-import cvPDF from "../../assets/RESUME.pdf";
+import cvPDF from "../../assets/MIGELTAN_RESUME.pdf";
 import About from "./Introduction";
 import TableOfContents from "./TableOfContents";
 import Experience from "./Experience";

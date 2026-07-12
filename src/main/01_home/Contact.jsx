@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { AiOutlineCode, AiOutlineTool, AiOutlineBook } from "react-icons/ai";
 import { BsLinkedin, BsPersonLinesFill } from "react-icons/bs";
-import { FaGithub, FaInstagram } from "react-icons/fa";
+import { FaGithub, FaInstagram, FaEnvelope } from "react-icons/fa";
 
 const TrafficLights = ({ size = 12 }) => (
   <span
@@ -113,12 +113,12 @@ const rightNow = [
   {
     icon: AiOutlineCode,
     label: "Learning",
-    value: "Advanced React patterns & TypeScript",
+    value: "React Framework and Next.js for web development",
   },
   {
     icon: AiOutlineTool,
     label: "Building",
-    value: "Kwagee — a Stellar blockchain wallet",
+    value: "Machine Learning and AI projects for personal growth",
   },
   {
     icon: AiOutlineBook,
@@ -285,7 +285,8 @@ export default function Contact() {
               lineHeight: 1.5,
             }}
           >
-            To finish this midterm project for Object-Oriented programming.
+            To upskill myself in this time of summer vacation, and to learn more
+            about new technologies in the field of information technology!
           </div>
           <div
             style={{
@@ -342,6 +343,14 @@ export default function Contact() {
           >
             Instagram
           </ItemRow>
+          <ItemRow
+            t={t}
+            href="migellltan@gmail.com"
+            target="_blank"
+            icon={FaEnvelope}
+          >
+            Email
+          </ItemRow>
         </Panel>
 
         {/* Contact CTA */}
@@ -365,7 +374,7 @@ export default function Contact() {
                 lineHeight: 1.5,
               }}
             >
-              Open to learn more in the field of information technology!
+              Click to know more about me and my socials!
             </p>
             <span
               style={{

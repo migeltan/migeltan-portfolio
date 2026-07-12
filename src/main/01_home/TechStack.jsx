@@ -85,7 +85,6 @@ function useTheme() {
   return dark;
 }
 
-// Fires once, the first time the element scrolls into view.
 function useInView(threshold = 0.15) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -130,8 +129,6 @@ function tk(dark) {
   };
 }
 
-// Categories use consistent short titles (so headers don't wrap unevenly),
-// and each item list is alphabetized by `name`.
 const techStack = [
   {
     category: "Programming & Database",
@@ -176,14 +173,14 @@ const techStack = [
   },
 ];
 
-function ScrollRow({ items, t }) {
+// items now carry a fixed, explicit box/label height so the flex column
+// can never get squeezed to near-zero and clip or overlap on mobile.
+function ScrollRow({ items, t, isMobile }) {
   const scrollRef = useRef(null);
   const pauseTimeoutRef = useRef(null);
   const isPausedRef = useRef(false);
   const isSnappingRef = useRef(false);
 
-  // Pause auto-scroll briefly whenever the user interacts manually,
-  // then resume after a short delay.
   const pauseAutoScroll = (duration = 2500) => {
     isPausedRef.current = true;
     clearTimeout(pauseTimeoutRef.current);
@@ -201,16 +198,13 @@ function ScrollRow({ items, t }) {
     });
   };
 
-  // Snap the row to land on a whole card rather than leaving one sliced
-  // in half at the edge. Called whenever the row comes to rest (hover-pause
-  // or after manual arrow clicks).
   const snapToNearestCard = () => {
     const el = scrollRef.current;
     if (!el || isSnappingRef.current) return;
     const firstCard = el.querySelector("[data-card]");
     if (!firstCard) return;
 
-    const cardWidth = firstCard.offsetWidth + 14; // + gap
+    const cardWidth = firstCard.offsetWidth + 14;
     const nearest = Math.round(el.scrollLeft / cardWidth) * cardWidth;
 
     isSnappingRef.current = true;
@@ -220,7 +214,6 @@ function ScrollRow({ items, t }) {
     }, 400);
   };
 
-  // Continuous, slow auto-slide. Loops back to start on reaching the end.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -258,6 +251,11 @@ function ScrollRow({ items, t }) {
     zIndex: 2,
   };
 
+  // Fixed logo box height instead of flex:1/height:100% — guarantees the
+  // icon+label column never gets squashed by an ambiguous parent height.
+  const logoBoxHeight = isMobile ? 56 : 64;
+  const rowHeight = logoBoxHeight + 8 /* gap */ + 16; /* label line */
+
   return (
     <div
       onMouseEnter={() => {
@@ -272,8 +270,8 @@ function ScrollRow({ items, t }) {
         padding: "14px 12px",
         boxSizing: "border-box",
         width: "100%",
-        height: "100%",
-        minHeight: 0,
+        height: rowHeight + 28, // + top/bottom padding
+        flexShrink: 0,
       }}
     >
       <button
@@ -285,15 +283,8 @@ function ScrollRow({ items, t }) {
       </button>
 
       <div
-        style={{
-          position: "relative",
-          flex: 1,
-          minWidth: 0,
-          height: "100%",
-        }}
+        style={{ position: "relative", flex: 1, minWidth: 0, height: "100%" }}
       >
-        {/* Edge fade masks so a partially-scrolled card fades out instead
-            of ending in a hard visual cut. */}
         <div
           style={{
             position: "absolute",
@@ -350,9 +341,9 @@ function ScrollRow({ items, t }) {
             >
               <div
                 style={{
-                  flex: 1,
                   width: "100%",
-                  minHeight: 0,
+                  height: logoBoxHeight,
+                  flexShrink: 0,
                   borderRadius: "10px",
                   border: `1px solid ${t.logoBorder}`,
                   background: t.logoBg,
@@ -423,7 +414,9 @@ function ScrollRow({ items, t }) {
 export default function TechStack() {
   const dark = useTheme();
   const t = tk(dark);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  );
   const [sectionRef, inView] = useInView(0.1);
 
   useEffect(() => {
@@ -440,7 +433,9 @@ export default function TechStack() {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
+        // was height: "100%" unconditionally — on mobile there's no fixed
+        // outer height to fill, so this collapsed the whole panel chain.
+        height: isMobile ? "auto" : "100%",
         opacity: inView ? 1 : 0,
         transform: inView ? "translateY(0px)" : "translateY(28px)",
         transition: "opacity 0.7s ease, transform 0.7s ease",
@@ -468,10 +463,10 @@ export default function TechStack() {
           display: "grid",
           gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)",
           gridTemplateRows: isMobile ? undefined : "repeat(2, 1fr)",
-          gap: "16px",
+          gap: isMobile ? "12px" : "16px",
           marginTop: "16px",
           width: "100%",
-          flex: 1,
+          flex: isMobile ? undefined : 1,
         }}
       >
         {techStack.map(({ category, items }, i) => (
@@ -486,7 +481,10 @@ export default function TechStack() {
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
-              height: "100%",
+              // was height: "100%" always — now auto on mobile, so it sizes
+              // to its actual content (fixed-height ScrollRow) instead of
+              // collapsing.
+              height: isMobile ? "auto" : "100%",
               opacity: inView ? 1 : 0,
               transform: inView ? "translateY(0px)" : "translateY(20px)",
               transition: `opacity 0.6s ease ${0.1 + i * 0.08}s, transform 0.6s ease ${0.1 + i * 0.08}s`,
@@ -508,7 +506,7 @@ export default function TechStack() {
               <h3
                 style={{
                   margin: 0,
-                  fontSize: "1rem",
+                  fontSize: isMobile ? "0.92rem" : "1rem",
                   fontWeight: 700,
                   color: t.panelTitle,
                   whiteSpace: "nowrap",
@@ -520,8 +518,8 @@ export default function TechStack() {
               </h3>
             </div>
 
-            <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
-              <ScrollRow items={items} t={t} />
+            <div style={{ minHeight: 0, display: "flex" }}>
+              <ScrollRow items={items} t={t} isMobile={isMobile} />
             </div>
           </div>
         ))}

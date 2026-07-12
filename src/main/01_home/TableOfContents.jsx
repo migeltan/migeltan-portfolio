@@ -84,6 +84,20 @@ function useInView(threshold = 0.15) {
   return [ref, inView];
 }
 
+// Stacks the category panels full-width below this breakpoint instead of
+// squeezing 3 columns and truncating every label to "Da...", "Pro...", etc.
+function useIsMobile(breakpoint = 560) {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < breakpoint : false,
+  );
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 function tk(dark) {
   return {
     panelBg: dark ? "#161b22" : "#ffffff",
@@ -104,8 +118,6 @@ function tk(dark) {
   };
 }
 
-// NOTE: every Dashboard item now carries a scrollTo id — make sure the
-// matching section in your page has that exact id attribute.
 const tableOfContents = [
   {
     category: "Dashboard",
@@ -164,18 +176,16 @@ const maxItems = Math.max(...tableOfContents.map((c) => c.items.length));
 export default function TableOfContents({ onPageChange, onScrollTo }) {
   const dark = useTheme();
   const t = tk(dark);
+  const isMobile = useIsMobile();
   const [sectionRef, inView] = useInView(0.1);
   const [hoveredPanel, setHoveredPanel] = useState(null);
 
   const handleClick = (category, props) => {
     if (category === "Projects") {
-      // Switches to the Projects page; that page is responsible for
-      // reading props.scrollTo and scrolling to it on mount.
       onPageChange("Projects", props);
     } else if (category === "Contacts") {
       onPageChange("Contacts", {});
     } else {
-      // Dashboard — scroll within the current page
       if (props.scrollTo) onScrollTo(props.scrollTo);
     }
   };
@@ -210,13 +220,15 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "clamp(6px, 2.5vw, 16px)",
+          // 1 column (stacked, full width) on mobile so labels never truncate;
+          // 3 columns side-by-side once there's actually room for them.
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+          gap: isMobile ? "10px" : "clamp(6px, 2.5vw, 16px)",
           marginTop: "16px",
         }}
       >
         {tableOfContents.map(({ category, items }, idx) => {
-          const placeholderCount = maxItems - items.length;
+          const placeholderCount = isMobile ? 0 : maxItems - items.length;
           const hovered = hoveredPanel === category;
 
           return (
@@ -242,7 +254,9 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
             >
               <div
                 style={{
-                  padding: "clamp(8px, 3vw, 12px) clamp(6px, 3vw, 16px)",
+                  padding: isMobile
+                    ? "10px 14px"
+                    : "clamp(8px, 3vw, 12px) clamp(6px, 3vw, 16px)",
                   borderBottom: `1px solid ${t.panelHeaderBorder}`,
                   background: t.panelHeaderBg,
                   display: "flex",
@@ -253,12 +267,15 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
                 <h3
                   style={{
                     margin: 0,
-                    fontSize: "clamp(0.78rem, 3.2vw, 1rem)",
+                    fontSize: isMobile
+                      ? "0.95rem"
+                      : "clamp(0.78rem, 3.2vw, 1rem)",
                     fontWeight: 700,
                     color: t.panelTitle,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
+                    // no more truncation now that panels are full-width on mobile
+                    whiteSpace: isMobile ? "normal" : "nowrap",
+                    overflow: isMobile ? "visible" : "hidden",
+                    textOverflow: isMobile ? "clip" : "ellipsis",
                   }}
                 >
                   {category}
@@ -267,10 +284,13 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
 
               <div
                 style={{
-                  padding: "clamp(8px, 3vw, 14px) clamp(6px, 3vw, 16px)",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "clamp(6px, 2vw, 10px)",
+                  padding: isMobile
+                    ? "10px 14px"
+                    : "clamp(8px, 3vw, 14px) clamp(6px, 3vw, 16px)",
+                  display: isMobile ? "grid" : "flex",
+                  gridTemplateColumns: isMobile ? "1fr 1fr" : undefined,
+                  flexDirection: isMobile ? undefined : "column",
+                  gap: isMobile ? "8px" : "clamp(6px, 2vw, 10px)",
                 }}
               >
                 {items.map(({ label, icon: Icon, props }) => (
@@ -282,17 +302,23 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
                       alignItems: "center",
                       gap: "8px",
                       textAlign: "left",
-                      fontSize: "clamp(0.62rem, 2.6vw, 0.85rem)",
+                      fontSize: isMobile
+                        ? "0.78rem"
+                        : "clamp(0.62rem, 2.6vw, 0.85rem)",
                       fontWeight: 600,
                       color: t.btnText,
                       background: t.btnBg,
                       border: `1px solid ${t.btnBorder}`,
                       borderRadius: "8px",
-                      padding: "clamp(6px, 2vw, 10px) clamp(6px, 2vw, 14px)",
+                      padding: isMobile
+                        ? "8px 10px"
+                        : "clamp(6px, 2vw, 10px) clamp(6px, 2vw, 14px)",
                       cursor: "pointer",
                       transition: "background 0.2s",
-                      whiteSpace: "nowrap",
+                      // full labels visible now — no more ellipsis truncation on mobile
+                      whiteSpace: isMobile ? "normal" : "nowrap",
                       overflow: "hidden",
+                      lineHeight: 1.25,
                     }}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background = t.btnHoverBg)
@@ -309,7 +335,10 @@ export default function TableOfContents({ onPageChange, onScrollTo }) {
                       }}
                     />
                     <span
-                      style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                      style={{
+                        overflow: isMobile ? "visible" : "hidden",
+                        textOverflow: isMobile ? "clip" : "ellipsis",
+                      }}
                     >
                       {label}
                     </span>

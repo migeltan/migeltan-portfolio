@@ -20,7 +20,6 @@ function useTheme() {
   return dark;
 }
 
-// Fires once, the first time the element scrolls into view.
 function useInView(threshold = 0.15) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -42,6 +41,20 @@ function useInView(threshold = 0.15) {
   }, [threshold]);
 
   return [ref, inView];
+}
+
+// Single column on phones — two cramped columns was forcing every title to
+// wrap and every paragraph to run dense and hard to scan.
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < breakpoint : false,
+  );
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [breakpoint]);
+  return isMobile;
 }
 
 function tk(dark) {
@@ -67,32 +80,32 @@ function tk(dark) {
 
 const certificates = [
   {
-    href: "https://github.com/migeltan/COBOL-Practices",
-    title: "Data Collection and Annotation NC II",
-    desc: "A TESDA certificate of completion for the Data Collection and Annotation NC II course. This course covers the fundamentals of data collection, annotation techniques, and best practices in data management. Accumulated 224 hours of training and successfully completed the required assessments.",
+    href: "",
+    title: "Artficial Intelligence for Automation NC III",
+    desc: "A TESDA certificate of completion for the Artficial Intelligence for Automation NC III course. This course covers the fundamentals of artificial intelligence, automation techniques, and best practices in AI development. Accumulated 224 hours of training and successfully completed the required assessments.",
     tag: "TESDA Certificate",
   },
   {
-    href: "https://github.com/migeltan/Java-OOP",
+    href: "",
     title: "Programming (Java) NC III",
     desc: "A TESDA certificate of completion for the Programming (Java) NC III course. This course covers the fundamentals of Java programming, object-oriented programming concepts, and software development best practices.",
     tag: "TESDA Certificate",
   },
   {
-    href: "https://github.com/migeltan/Pag-IBIG-Project",
+    href: "https://www.datacamp.com/completed/statement-of-accomplishment/course/ed3ef2483126328a1e7e11c941be8ae8187bd4ed",
     title: "DataCamp: Intermediate Python and SQL for Data Science",
     desc: "A DataCamp certificate of completion for the Intermediate Python and SQL for Data Science course. This course covers advanced Python programming techniques, data manipulation, and SQL querying for data analysis. Accumulated 8 hours of self-paced learning and successfully completed the required assessments.",
     tag: "DataCamp Certificate",
   },
   {
-    href: "https://github.com/migeltan/C-Practices",
+    href: "https://www.credly.com/badges/3b0891f3-426c-46da-b568-62e392f53579",
     title: "Cisco Networking Academy: Networking Basics",
     desc: "A Cisco Networking Academy certificate of completion for the Networking Basics course. This course covers the fundamentals of networking, including network protocols, IP addressing, and network troubleshooting. Accumulated 15 hours of self-paced learning and successfully completed the required assessments.",
     tag: "Cisco Networking Academy Certificate",
   },
 ];
 
-function CertificateCard({ certificate, t, delay, inView }) {
+function CertificateCard({ certificate, t, delay, inView, isMobile }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -108,7 +121,7 @@ function CertificateCard({ certificate, t, delay, inView }) {
         display: "flex",
         flexDirection: "column",
         gap: "12px",
-        padding: "18px 20px",
+        padding: isMobile ? "16px 16px" : "18px 20px",
         borderRadius: "12px",
         border: `1px solid ${t.cardBorder}`,
         background: t.cardBg,
@@ -148,7 +161,7 @@ function CertificateCard({ certificate, t, delay, inView }) {
         <h3
           style={{
             margin: 0,
-            fontSize: "0.98rem",
+            fontSize: isMobile ? "1.02rem" : "0.98rem",
             fontWeight: 700,
             lineHeight: 1.35,
             color: t.heading,
@@ -161,7 +174,7 @@ function CertificateCard({ certificate, t, delay, inView }) {
       <p
         style={{
           margin: 0,
-          fontSize: "0.82rem",
+          fontSize: isMobile ? "0.85rem" : "0.82rem",
           lineHeight: 1.6,
           color: t.subText,
         }}
@@ -176,6 +189,7 @@ function CertificateCard({ certificate, t, delay, inView }) {
           justifyContent: "space-between",
           gap: "10px",
           marginTop: "2px",
+          flexWrap: isMobile ? "wrap" : "nowrap",
         }}
       >
         <span
@@ -221,6 +235,7 @@ function CertificateCard({ certificate, t, delay, inView }) {
 export default function RecentCertificates() {
   const dark = useTheme();
   const t = tk(dark);
+  const isMobile = useIsMobile();
   const [sectionRef, inView] = useInView(0.1);
 
   return (
@@ -252,8 +267,8 @@ export default function RecentCertificates() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "16px",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)",
+          gap: isMobile ? "12px" : "16px",
         }}
       >
         {certificates.map((certificate, i) => (
@@ -263,6 +278,7 @@ export default function RecentCertificates() {
             t={t}
             delay={0.05 + i * 0.08}
             inView={inView}
+            isMobile={isMobile}
           />
         ))}
       </div>
